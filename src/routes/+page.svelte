@@ -2,16 +2,31 @@
 	import TasksForm from "../components/tasks-form.svelte";
 	import TasksList from "../components/tasks-list.svelte";
 	import type { Task, Filter } from "../types";
-
-	let message: string = "Tarefas";
+	
 	let currentFilter = $state<Filter>("all");
 	let tasks = $state<Task[]>([]);
+	const aliasTaskLocal = "tasks-todo-app";
 
 	let totalDone = $derived(
 		tasks.reduce(
 			(total, task) => total + Number(task.done), 0
 		)
 	)
+
+	function loadTasks() {
+		if (typeof window !== "undefined") { 
+			const savedTasks = localStorage.getItem(aliasTaskLocal);
+			if (savedTasks) {
+				tasks = JSON.parse(savedTasks);
+			}
+		}
+	}
+
+	function saveTasks() {
+		localStorage.setItem(aliasTaskLocal, JSON.stringify(tasks));
+	}
+
+	loadTasks();
 
 	let filteredTasks = $derived.by(() => {
 		switch(currentFilter){
@@ -36,17 +51,29 @@
 			title: newTask,
 			done: false
 		});
+		saveTasks();
 	}
 
 	function toggleDone(task: Task){
 		task.done = !task.done;
+		saveTasks();
 	}
 
 	function removeTask(id: string){
 		const index = tasks.findIndex((task) => {
 			task.id === id
 		});
-		tasks.splice(index, 1)
+		tasks.splice(index, 1);
+		saveTasks();
+	}
+
+
+	function updateTask(id: string, newTitle: string) {
+		const task = tasks.find(task => task.id === id);
+		if (task) {
+			task.title = newTitle;
+			saveTasks();
+		}
 	}
 
 	
@@ -60,7 +87,6 @@
 
 <main>
 	<!--Criar data-->
-	<h1>{message}</h1>
 	<TasksForm {addTask}/>
 	<p class="task-status">
 		{#if tasks.length} 
@@ -77,7 +103,7 @@
 			 {@render filterButton("done", "Concluídas")}
 		</div>
 	{/if}
-	<TasksList tasks={filteredTasks} {toggleDone} {removeTask}/>
+	<TasksList tasks={filteredTasks} {toggleDone} {removeTask} {updateTask} />
 </main>
 
 <style>

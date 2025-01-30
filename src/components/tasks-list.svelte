@@ -1,10 +1,24 @@
 <script lang="ts">
 	import type { Task } from "../types";
-	let { tasks, toggleDone, removeTask } : {
+	let { tasks, toggleDone, removeTask, updateTask } : {
 		tasks: Task[];
 		toggleDone: (task: Task) => void;
 		removeTask: (id: string) => void;
+		updateTask: (id: string, newTitle: string) => void;
 	} = $props();
+
+	let editingTaskId = $state("");
+	let editingTitle = $state("");
+
+	function startEditing(task: Task) {
+		editingTaskId = task.id;
+		editingTitle = task.title;
+	}
+
+	function cancelEditing() {
+		editingTaskId = "";
+		editingTitle = "";
+	}
 
 
 </script>
@@ -12,17 +26,28 @@
 <section class="task-list">
 	{#each tasks as task}
 		<article class="task">
-			<label class="task-label">
+			{#if editingTaskId === task.id}
 				<input 
-					checked={task.done} 
-					type="checkbox"
-					onchange={() => toggleDone(task)}
-					class="task-checkbox"
-				>
-				<span class:done={task.done}>{task.title}</span>
-			</label>
-			<button class="delete-button" onclick={() => removeTask(task.id)}>🗑️</button>
-		</article>
+					type="text" 
+					bind:value={editingTitle}
+					class="task-edit-input"
+				/>
+				<button class="save-button" onclick={() => { updateTask(task.id, editingTitle); cancelEditing(); }}>Salvar</button>
+				<button class="cancel-button" onclick={cancelEditing}>Cancelar</button>
+			{:else}
+				<label class="task-label">
+					<input 
+						checked={task.done} 
+						type="checkbox"
+						onchange={() => toggleDone(task)}
+						class="task-checkbox"
+					>
+					<span class:done={task.done}>{task.title}</span>
+				</label>
+				<button class="edit-button" onclick={() => startEditing(task)}>✏️</button>
+				<button class="delete-button" onclick={() => removeTask(task.id)}>🗑️</button>
+				{/if}
+			</article>
 	{/each}
 </section>
 
@@ -98,7 +123,51 @@
 		transition: color 0.2s ease;
 	}
 
-		span {
-			word-break: break-word;
-		}
+	span {
+		word-break: break-word;
+	}
+
+	.task-edit-input {
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    width: 80%;
+    max-width: 300px;
+	}
+	.save-button, .cancel-button {
+			background: #007bff;
+			color: white;
+			border: none;
+			padding: 8px 12px;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 1rem;
+			margin-left: 10px;
+			transition: background-color 0.3s ease;
+	}
+
+	.save-button:hover, .cancel-button:hover {
+			background-color: #0056b3;
+	}
+
+	.cancel-button {
+			background-color: #ff4d4d;
+	}
+
+	.cancel-button:hover {
+			background-color: #cc0000;
+	}
+	.edit-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #007bff;
+    transition: color 0.2s ease;
+}
+
+	.edit-button:hover {
+			color: #0056b3;
+	}
 </style>
