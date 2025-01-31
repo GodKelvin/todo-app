@@ -42,7 +42,23 @@
 						onchange={() => toggleDone(task)}
 						class="task-checkbox"
 					>
-					<span class:done={task.done}>{task.title}</span>
+					<div class="task-content">
+            <span class:done={task.done}>{task.title}</span>
+            <span class="task-date">
+							📆 {new Date(task.createdAt).toLocaleString("pt-BR", { 
+									day: "2-digit", month: "2-digit", year: "numeric", 
+									hour: "2-digit", minute: "2-digit" 
+							})}
+            </span>
+						{#if task.done}
+							<span class="task-date">
+								✅ {new Date(task.finishedAt).toLocaleString("pt-BR", { 
+										day: "2-digit", month: "2-digit", year: "numeric", 
+										hour: "2-digit", minute: "2-digit" 
+								})}
+							</span>
+						{/if}
+        	</div>
 				</label>
 				<button class="edit-button" onclick={() => startEditing(task)}>✏️</button>
 				<button class="delete-button" onclick={() => removeTask(task.id)}>🗑️</button>
@@ -169,5 +185,16 @@
 
 	.edit-button:hover {
 			color: #0056b3;
+	}
+
+	.task-content {
+    display: flex;
+    flex-direction: column;
+	}
+
+	.task-date {
+			font-size: 0.8rem;
+			color: #666;
+			margin-top: 4px;
 	}
 </style>

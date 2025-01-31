@@ -49,22 +49,29 @@
 		tasks.push({
 			id: crypto.randomUUID(),
 			title: newTask,
-			done: false
+			done: false,
+			createdAt: new Date().toISOString(),
+			finishedAt: ""
 		});
 		saveTasks();
 	}
 
 	function toggleDone(task: Task){
 		task.done = !task.done;
+		if(task.done){
+			task.finishedAt = new Date().toISOString();
+		} else {
+			task.finishedAt = "";
+		}
 		saveTasks();
 	}
 
 	function removeTask(id: string){
-		const index = tasks.findIndex((task) => {
-			task.id === id
-		});
-		tasks.splice(index, 1);
-		saveTasks();
+		const index = tasks.findIndex((task) => task.id === id);
+		if (window.confirm(`Tem certeza que deseja excluir a tarefa?`)) {
+			tasks.splice(index, 1);
+			saveTasks();
+    }
 	}
 
 
